@@ -2,7 +2,7 @@
 
 Ported from the proven hello-hari Android app (MultiLanguageScamDetector.java).
 Two detection layers:
-1. Exact phrase matching across 585+ English patterns in 10 categories.
+1. Exact phrase matching across 550+ English patterns in 9 categories.
 2. Multi-archetype keyword co-occurrence engine (13 archetypes × 10 Indian
    language scripts + English) — see scam_archetypes.py.
 
@@ -297,40 +297,6 @@ FAMILY_EMERGENCY_PATTERNS: dict[str, int] = {
     "uncle needs immediate help": 85,
 }
 
-# === ROMANCE & RELATIONSHIP SCAMS ===
-ROMANCE_PATTERNS: dict[str, int] = {
-    "i dropped a tear in the ocean": 70,
-    "crazy in love with you": 65,
-    "different from all other girls boys": 70,
-    "god has brought us together": 70,
-    "same cultural values": 65,
-    "goals perfectly aligned": 65,
-    "family doesnt understand our love": 75,
-    "keep our relationship secret": 75,
-    "working in restricted military area": 80,
-    "company policy no personal calls": 75,
-    "time difference makes it difficult": 70,
-    "phone broken stolen": 75,
-    "need money for visa to meet you": 85,
-    "stuck at airport need travel funds": 85,
-    "customs seized my money": 80,
-    "military deployment restricted": 78,
-    "peacekeeping mission abroad": 76,
-    "oil rig worker": 72,
-    "doctor without borders": 74,
-    "overseas construction project": 70,
-    "diplomatic mission confidential": 82,
-    "international business meeting": 68,
-    "medical conference emergency": 70,
-    "family illness need money": 85,
-    "wallet stolen in foreign country": 80,
-    "bank account frozen abroad": 82,
-    "emergency medical treatment": 78,
-    "legal issues need lawyer fees": 85,
-    "hotel bill payment problem": 75,
-    "flight cancellation stranded": 72,
-}
-
 # === HINDI ADVANCED PATTERNS (Romanized + Devanagari) ===
 HINDI_ADVANCED_PATTERNS: dict[str, int] = {
     # Respectful manipulation
@@ -621,7 +587,6 @@ PATTERN_CATEGORIES: list[tuple[str, dict[str, int]]] = [
     ("INVESTMENT_FRAUD", INVESTMENT_PATTERNS),
     ("BANK_OTP", BANK_OTP_PATTERNS),
     ("FAMILY_EMERGENCY", FAMILY_EMERGENCY_PATTERNS),
-    ("ROMANCE_SCAM", ROMANCE_PATTERNS),
     ("HINDI_SCAM", HINDI_ADVANCED_PATTERNS),
     ("TELUGU_SCAM", TELUGU_ADVANCED_PATTERNS),
     ("HINGLISH_SCAM", HINGLISH_PATTERNS),
@@ -634,7 +599,6 @@ CATEGORY_LABELS: dict[str, str] = {
     "INVESTMENT_FRAUD": "Investment / cryptocurrency fraud",
     "BANK_OTP": "Bank impersonation / OTP theft",
     "FAMILY_EMERGENCY": "Family emergency / voice cloning scam",
-    "ROMANCE_SCAM": "Romance / relationship scam",
     "HINDI_SCAM": "Hindi authority / banking scam",
     "TELUGU_SCAM": "Telugu targeted scam",
     "HINGLISH_SCAM": "Hinglish tech-support / banking scam",
