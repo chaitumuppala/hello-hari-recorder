@@ -82,9 +82,10 @@ function getState(status: StreamStatus, analysis: ScamAnalysis | null) {
 
   if (!analysis || analysis.risk_score === 0) {
     const listening = status === "streaming";
+    const safeWhileListening = listening && analysis !== null;
     return {
-      icon: listening ? "🎙️" : "🛡️",
-      label: listening ? "LISTENING" : "SAFE",
+      icon: safeWhileListening ? "🛡️" : listening ? "🎙️" : "🛡️",
+      label: safeWhileListening ? "SAFE" : listening ? "LISTENING" : "SAFE",
       bg: listening
         ? "radial-gradient(circle, #1a2e1a 0%, #0f172a 100%)"
         : "radial-gradient(circle, #0f2a1a 0%, #0f172a 100%)",
