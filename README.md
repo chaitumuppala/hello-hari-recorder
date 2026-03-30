@@ -11,17 +11,12 @@
 > **[Try the live demo →](https://huggingface.co/spaces/chaitumuppala/indian-scam-detector)**
 
 <p align="center">
-  <img src="docs/images/scam-detected.png" alt="Scam Detected — shield turns red with matched patterns" width="320" />
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/images/safe-listening.png" alt="Safe — green shield while listening" width="320" />
+  <img src="docs/images/Scam%20Call.jpg" alt="Scam Detected — shield turns red with matched patterns" width="240" />
+  &nbsp;&nbsp;
+  <img src="docs/images/Listening.jpg" alt="Listening — analyzing audio in real time" width="240" />
+  &nbsp;&nbsp;
+  <img src="docs/images/Safe%20Call.jpg" alt="Safe — green shield, conversation is clean" width="240" />
 </p>
-
-<!--
-  📸 Add screenshots to docs/images/:
-  - scam-detected.png  → red shield + pattern pills visible
-  - safe-listening.png → green shield during safe conversation
-  - (optional) debug-panel.png → expanded debug view with pipeline trace
--->
 
 ---
 
