@@ -4,6 +4,8 @@ import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { ShieldIndicator } from "./ShieldIndicator";
 import { DebugPanel } from "./DebugPanel";
 
+const isDebugMode = new URLSearchParams(window.location.search).has("debug");
+
 export function AudioRecorder() {
   const [language, setLanguage] = useState("te");
   const [showDebug, setShowDebug] = useState(false);
@@ -84,15 +86,18 @@ export function AudioRecorder() {
         </div>
       )}
 
-      {/* Debug toggle */}
-      <button
-        onClick={() => setShowDebug(!showDebug)}
-        style={debugToggleStyle}
-      >
-        {showDebug ? "Hide" : "Show"} Debug Panel
-      </button>
-
-      {showDebug && <DebugPanel events={events} />}
+      {/* Debug toggle — only visible with ?debug URL param */}
+      {isDebugMode && (
+        <>
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            style={debugToggleStyle}
+          >
+            {showDebug ? "Hide" : "Show"} Debug Panel
+          </button>
+          {showDebug && <DebugPanel events={events} />}
+        </>
+      )}
     </div>
   );
 }

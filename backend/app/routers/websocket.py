@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import time as _time
+import uuid
 from datetime import datetime
 
 import numpy as np
@@ -9,7 +10,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.asr.base import ASREngine
 from app.config import settings
-from app.db.database import save_record
+from app.db.database import create_session, end_session, save_record
 from app.detection.scam_detector import analyze_text
 from app.models.schemas import CallRecord
 
@@ -28,11 +29,15 @@ def set_engine(engine: ASREngine) -> None:
 class _SessionState:
     """Mutable state for one streaming session."""
 
-    def __init__(self) -> None:
+    def __init__(self, session_id: str) -> None:
+        self.session_id = session_id
         self.transcript_window: list[str] = []
         self.session_max_score: float = 0.0
         self.session_max_analysis = None
         self.window_size = 6
+        self.total_chunks: int = 0
+        self.total_audio_seconds: float = 0.0
+        self.all_transcripts: list[str] = []
 
 
 async def _process_chunk(
@@ -111,7 +116,12 @@ async def _process_chunk(
         language=result.language,
         scam_analysis=analysis,
         audio_duration=result.end_time - result.start_time,
-    ))
+    ), session_id=state.session_id)
+
+    # Track session-level metrics
+    state.total_chunks += 1
+    state.total_audio_seconds += result.end_time - result.start_time
+    state.all_transcripts.append(result.text.strip())
 
     try:
         await websocket.send_json({
@@ -152,7 +162,10 @@ async def websocket_stream(websocket: WebSocket):
     5. Either side can close the connection
     """
     await websocket.accept()
-    logger.info("WebSocket client connected")
+
+    session_id = uuid.uuid4().hex[:16]
+    user_agent = dict(websocket.headers).get("user-agent", "")
+    logger.info("WebSocket client connected | session=%s", session_id)
 
     if not asr_engine or not asr_engine.is_loaded():
         await websocket.send_json({"error": "ASR engine not ready"})
@@ -164,9 +177,12 @@ async def websocket_stream(websocket: WebSocket):
     try:
         config = await websocket.receive_json()
         language = config.get("language", "hi")
-        logger.info("Stream config: language=%s", language)
+        logger.info("Stream config: language=%s | session=%s", language, session_id)
     except Exception:
         logger.warning("No config received, using defaults")
+
+    # Persist session start
+    create_session(session_id, language, user_agent)
 
     chunk_bytes = settings.sample_rate * 2 * settings.chunk_duration_seconds  # 16-bit
     # Queue holds complete 5s audio chunks (as bytes) ready for processing
@@ -205,7 +221,7 @@ async def websocket_stream(websocket: WebSocket):
 
     async def processor():
         """Pull chunks from queue, transcribe, detect, send results."""
-        state = _SessionState()
+        state = _SessionState(session_id)
 
         while True:
             chunk = await audio_queue.get()
@@ -214,12 +230,12 @@ async def websocket_stream(websocket: WebSocket):
 
             queued = audio_queue.qsize()
             if queued > 0:
-                logger.info("QUEUE | %d chunks waiting", queued)
+                logger.info("QUEUE | %d chunks waiting | session=%s", queued, session_id)
 
             audio_duration_sec = len(chunk) / 2 / settings.sample_rate
             logger.info(
-                "STAGE_1_AUDIO | chunk_bytes=%d | duration=%.1fs | language=%s | queued=%d",
-                len(chunk), audio_duration_sec, language, queued,
+                "STAGE_1_AUDIO | chunk_bytes=%d | duration=%.1fs | language=%s | queued=%d | session=%s",
+                len(chunk), audio_duration_sec, language, queued, session_id,
             )
 
             ok = await _process_chunk(chunk, language, state, websocket)
@@ -240,7 +256,26 @@ async def websocket_stream(websocket: WebSocket):
                 break
 
         if remaining:
-            logger.info("DRAIN | processed %d remaining chunks after stop", remaining)
+            logger.info("DRAIN | processed %d remaining chunks after stop | session=%s", remaining, session_id)
+
+        # Persist session summary
+        final_analysis = state.session_max_analysis
+        end_session(
+            session_id,
+            total_chunks=state.total_chunks,
+            total_audio_seconds=state.total_audio_seconds,
+            final_risk_score=state.session_max_score,
+            final_is_scam=bool(final_analysis and final_analysis.is_scam),
+            final_matched_patterns=(
+                final_analysis.matched_patterns if final_analysis else []
+            ),
+            full_transcript=" ".join(state.all_transcripts),
+        )
+        logger.info(
+            "SESSION_END | session=%s | chunks=%d | audio=%.1fs | risk=%.2f | scam=%s",
+            session_id, state.total_chunks, state.total_audio_seconds,
+            state.session_max_score, bool(final_analysis and final_analysis.is_scam),
+        )
 
         try:
             await websocket.send_json({"type": "done", "total_chunks": remaining})
