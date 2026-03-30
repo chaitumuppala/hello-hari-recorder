@@ -1,0 +1,64 @@
+"""Download whisper.cpp GGML model files.
+
+Usage:
+    python download_models.py              # Downloads "base" model
+    python download_models.py large-v3     # Downloads "large-v3" model
+
+Models are saved to backend/models/
+"""
+
+import sys
+import urllib.request
+from pathlib import Path
+
+MODELS_DIR = Path(__file__).resolve().parent.parent.parent / "backend" / "models"
+
+# whisper.cpp GGML model URLs (from huggingface.co/ggerganov/whisper.cpp)
+BASE_URL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main"
+
+AVAILABLE_MODELS = {
+    "tiny": "ggml-tiny.bin",
+    "base": "ggml-base.bin",
+    "small": "ggml-small.bin",
+    "medium": "ggml-medium.bin",
+    "large-v3": "ggml-large-v3.bin",
+}
+
+
+def download_model(model_name: str) -> None:
+    if model_name not in AVAILABLE_MODELS:
+        print(f"Unknown model: {model_name}")
+        print(f"Available: {', '.join(AVAILABLE_MODELS.keys())}")
+        sys.exit(1)
+
+    filename = AVAILABLE_MODELS[model_name]
+    url = f"{BASE_URL}/{filename}"
+    dest = MODELS_DIR / filename
+
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+    if dest.exists():
+        size_mb = dest.stat().st_size / (1024 * 1024)
+        print(f"Model already exists: {dest} ({size_mb:.0f} MB)")
+        return
+
+    print(f"Downloading {model_name} model...")
+    print(f"  URL:  {url}")
+    print(f"  Dest: {dest}")
+    print()
+
+    def progress(block_num, block_size, total_size):
+        downloaded = block_num * block_size
+        if total_size > 0:
+            pct = downloaded * 100 / total_size
+            mb = downloaded / (1024 * 1024)
+            total_mb = total_size / (1024 * 1024)
+            print(f"\r  {mb:.0f}/{total_mb:.0f} MB ({pct:.1f}%)", end="", flush=True)
+
+    urllib.request.urlretrieve(url, dest, reporthook=progress)
+    print(f"\n  Done! Saved to {dest}")
+
+
+if __name__ == "__main__":
+    model = sys.argv[1] if len(sys.argv) > 1 else "base"
+    download_model(model)

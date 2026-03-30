@@ -1,0 +1,14 @@
+# ASR Engine - faster-whisper (CTranslate2, works great on Linux ARM64 / WSL2)
+faster-whisper>=1.0.0
+
+# ASR Engine - IndicConformer (AI4Bharat, 22 Indian languages, best for Telugu/Hindi)
+transformers>=4.40.0
+onnxruntime==1.20.1
+# torch and torchaudio installed separately: pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# API
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic-settings>=2.0.0
+numpy>=1.26.0
+python-multipart>=0.0.18
