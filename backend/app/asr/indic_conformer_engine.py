@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 
 import numpy as np
@@ -33,6 +34,7 @@ class IndicConformerEngine(ASREngine):
             self._model = AutoModel.from_pretrained(
                 "ai4bharat/indic-conformer-600m-multilingual",
                 trust_remote_code=True,
+                token=os.environ.get("HF_TOKEN"),
             )
             elapsed = time.monotonic() - t0
             self._loaded = True

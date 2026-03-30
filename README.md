@@ -2,6 +2,27 @@
 
 **Real-time, on-device scam detection for phone calls — in 11 Indian languages.**
 
+[![Live Demo](https://img.shields.io/badge/🛡️_Live_Demo-HuggingFace_Spaces-yellow)](https://huggingface.co/spaces/chaitumuppala/indian-scam-detector)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-53_passing-brightgreen)]()
+[![Languages](https://img.shields.io/badge/Languages-11-blue)]()
+[![Scam Types](https://img.shields.io/badge/Scam_Types-13-red)]()
+
+> **[Try the live demo →](https://huggingface.co/spaces/chaitumuppala/indian-scam-detector)**
+
+<p align="center">
+  <img src="docs/images/scam-detected.png" alt="Scam Detected — shield turns red with matched patterns" width="320" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/images/safe-listening.png" alt="Safe — green shield while listening" width="320" />
+</p>
+
+<!--
+  📸 Add screenshots to docs/images/:
+  - scam-detected.png  → red shield + pattern pills visible
+  - safe-listening.png → green shield during safe conversation
+  - (optional) debug-panel.png → expanded debug view with pipeline trace
+-->
+
 ---
 
 ## The Problem

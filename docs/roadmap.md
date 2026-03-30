@@ -20,7 +20,7 @@
 | **PWA cannot access call audio** | User must use speaker mode | Privacy feature — no background listening |
 | **ASR errors break exact phrases** | "digital arrest" → "digital a rest" | Layer 2 co-occurrence matches individual keywords |
 | **Static patterns miss novel scripts** | Scammers evolve language | Co-occurrence engine + community updates |
-| **No labeled audio dataset** | Cannot train audio classifier | This POC demonstrates value to data holders |
+| **No labeled audio dataset** | Cannot train audio classifier | This project demonstrates value to data holders |
 | **Speaker mode + ambient noise** | Reduces ASR accuracy | VAD filtering, sliding window smoothing |
 
 ---
@@ -58,7 +58,7 @@ Train a model to detect scams directly from audio — no ASR, no text, no langua
 
 **Why it's the best approach at scale**: Language-agnostic (works by sound, not words). Tolerant of noise. Smaller models (5-20MB). Sub-second inference. But requires data that doesn't exist publicly today.
 
-This POC exists to demonstrate enough value to open that conversation.
+This project exists to demonstrate enough value to open that conversation.
 
 ---
 
@@ -80,7 +80,7 @@ Detection at the carrier network level, before the call reaches the user.
 
 ### Audio Classification (Ideal, Data-Blocked)
 
-Classify scam from acoustic features — prosody, tone, call center noise, VoIP artifacts. Language-agnostic, noise-tolerant. **Blocked by lack of labeled training data.** This POC aims to unlock that data.
+Classify scam from acoustic features — prosody, tone, call center noise, VoIP artifacts. Language-agnostic, noise-tolerant. **Blocked by lack of labeled training data.** This project aims to unlock that data.
 
 ### LLM-Only Classification (Appealing, Wrong Trade-off)
 
@@ -90,9 +90,9 @@ Replace patterns with LLM prompt: "Analyze this transcript for scam indicators."
 
 Small on-device ASR models (~40-50MB per language). Used successfully in the hello-hari Android app. Near-instant inference. Runs natively on ARM64. Trade-off: less accurate than faster-whisper/IndicConformer for general transcription, but patterns were originally written against Vosk output. Worth testing head-to-head.
 
-### Telecom-Level Only (Right at Scale, Wrong for POC)
+### Telecom-Level Only (Right at Scale, Wrong Starting Point)
 
-No device-side processing. Carrier-level detection. **But**: requires Jio/Airtel/BSNL/Vi partnership and regulatory backing. This POC demonstrates the technical feasibility to pitch for those partnerships.
+No device-side processing. Carrier-level detection. **But**: requires Jio/Airtel/BSNL/Vi partnership and regulatory backing. This project demonstrates the technical feasibility to pitch for those partnerships.
 
 ---
 
@@ -100,7 +100,7 @@ No device-side processing. Carrier-level detection. **But**: requires Jio/Airtel
 
 | Partner Type | What We Need | What We Offer |
 |--------------|-------------|---------------|
-| **Cyber crime cells** | Labeled scam call recordings | Working POC, open-source detection engine |
+| **Cyber crime cells** | Labeled scam call recordings | Working product, open-source detection engine |
 | **Telecoms** | Network integration, call metadata | Detection technology, pattern database |
 | **Researchers** | Larger datasets, model improvements | Open codebase, defined problem space |
 | **Platforms** | Call audio API access | Proven user-safety use case |

@@ -29,12 +29,14 @@ COPY backend/ ./
 # Copy built frontend into backend/static (served by FastAPI)
 COPY --from=frontend-build /app/frontend/dist ./static
 
-# Create data dir for SQLite
-RUN mkdir -p /app/data
+# Create non-root user (HF Spaces runs as uid 1000 — needs /etc/passwd entry for PyTorch)
+RUN useradd -m -u 1000 appuser
+
+# Create data + cache dirs with open permissions
+RUN mkdir -p /app/data /app/hf_cache && chown -R appuser:appuser /app && chmod -R 777 /app/data /app/hf_cache
 
 # HuggingFace cache dir — models download on first start
 ENV HF_HOME=/app/hf_cache
-RUN mkdir -p /app/hf_cache
 
 # Runtime config
 ENV SCAM_ASR_ENGINE=hybrid
@@ -42,5 +44,8 @@ ENV SCAM_WHISPER_MODEL=distil-small.en
 ENV SCAM_DEBUG=false
 
 EXPOSE 7860
+
+# HF Spaces runs as non-root user
+USER appuser
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
