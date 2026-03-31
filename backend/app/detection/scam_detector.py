@@ -2,7 +2,7 @@
 
 Ported from the proven hello-hari Android app (MultiLanguageScamDetector.java).
 Two detection layers:
-1. Exact phrase matching across 550+ English patterns in 9 categories.
+1. Exact phrase matching across 574+ English patterns in 9 categories.
 2. Multi-archetype keyword co-occurrence engine (13 archetypes × 10 Indian
    language scripts + English) — see scam_archetypes.py.
 
@@ -70,6 +70,48 @@ DIGITAL_ARREST_PATTERNS: dict[str, int] = {
     "child trafficking allegations": 100,
     "terrorism funding detected": 100,
     "fake currency circulation": 95,
+    # Secrecy / isolation demands (hallmark of scams — real police never say this)
+    "dont tell anyone about this call": 90,
+    "don't tell anyone about this call": 90,
+    "do not tell anyone": 85,
+    "do not inform your family": 90,
+    "do not inform anyone": 88,
+    "keep this between us": 85,
+    "keep this confidential": 80,
+    "this is a confidential matter": 78,
+    "do not discuss this with anyone": 88,
+    "if you tell anyone case will be worse": 92,
+    "if you inform anyone you will be arrested": 95,
+    "do not contact a lawyer": 95,
+    "no need to tell family": 85,
+    "kisi ko mat batana": 88,
+    "kisi ko bhi mat batao": 88,
+    "family ko mat bolo": 85,
+    "ghar mein kisi ko mat batao": 88,
+    # Threat escalation — arrest/jail/FIR
+    "fir will be filed against you": 90,
+    "fir file ho jayegi": 90,
+    "we will file an fir": 88,
+    "non bailable fir": 95,
+    "you will be arrested": 92,
+    "you will be arrested within 24 hours": 95,
+    "arrested within 2 hours": 95,
+    "police will come to your house": 88,
+    "we will send police to your house": 88,
+    "jail mein jayenge": 85,
+    "jail mein daal denge": 88,
+    "jail ho jayegi": 85,
+    "you will go to jail": 85,
+    "prison sentence": 82,
+    # Aadhaar / PAN misuse
+    "your aadhaar has been misused": 85,
+    "aadhaar card misuse": 85,
+    "your pan card has been misused": 85,
+    "someone used your aadhaar": 82,
+    "someone used your pan": 82,
+    "share your pan number": 78,
+    "tell me your aadhaar number": 80,
+    "share your aadhaar number": 80,
 }
 
 # === TRAI & TELECOM AUTHORITY SCAMS ===
@@ -162,6 +204,34 @@ INVESTMENT_PATTERNS: dict[str, int] = {
     "nft investment opportunity": 65,
     "metaverse land purchase": 62,
     "blockchain technology investment": 70,
+    # Lottery / prize / reward scams
+    "you have won a prize": 82,
+    "you have won a lottery": 85,
+    "you are the lucky winner": 85,
+    "congratulations you have been selected": 82,
+    "congratulations you are selected": 82,
+    "congratulations you won": 85,
+    "lucky draw winner": 82,
+    "lucky draw prize": 82,
+    "won a cash prize": 85,
+    "claim your prize": 85,
+    "claim your reward": 85,
+    "claim your gift": 80,
+    "collect your prize money": 85,
+    "prize money of": 80,
+    "reward amount of": 78,
+    "kaun banega crorepati": 88,
+    "kbc lottery": 90,
+    "kbc winner": 88,
+    "jio lottery winner": 85,
+    "airtel lucky draw": 85,
+    "whatsapp lottery": 88,
+    "facebook lottery": 85,
+    "google lottery winner": 88,
+    "you are selected for a cash prize": 85,
+    "pay tax to receive prize": 90,
+    "processing fee to claim prize": 90,
+    "pay to claim your reward": 88,
 }
 
 # === ENGLISH BANK / OTP / ACCOUNT SCAMS ===
@@ -287,6 +357,37 @@ BANK_OTP_PATTERNS: dict[str, int] = {
     "link your aadhaar": 72,
     "link your pan card": 72,
     "aadhaar verification": 70,
+    # Payment / fine / fee demands
+    "pay the fine": 75,
+    "pay the penalty": 75,
+    "pay the penalty amount": 78,
+    "pay a fine of": 78,
+    "pay the settlement amount": 80,
+    "settlement amount": 72,
+    "pay compensation amount": 78,
+    "pay processing fee": 75,
+    "pay the processing charges": 75,
+    "refundable security deposit": 78,
+    "security deposit required": 75,
+    "registration fee required": 72,
+    "pay registration fee": 72,
+    "pay the charges": 70,
+    "pay to release": 80,
+    "pay to unlock": 80,
+    "send money immediately": 82,
+    "transfer money now": 80,
+    "transfer money immediately": 82,
+    "do a upi transfer": 75,
+    "upi transfer karo": 78,
+    "go to nearest atm": 72,
+    "go to the atm": 70,
+    "withdraw cash and deposit": 80,
+    "deposit money in this account": 80,
+    "send money to this account": 82,
+    "transfer to this account number": 80,
+    "pay through google pay": 72,
+    "send through phonepe": 72,
+    "pay via paytm": 72,
 }
 
 # === FAMILY EMERGENCY & VOICE CLONING SCAMS ===
@@ -524,6 +625,46 @@ HINGLISH_PATTERNS: dict[str, int] = {
     "demat account problem": 78,
     "mutual fund redemption": 72,
     "insurance claim pending": 75,
+    # Platform / e-commerce impersonation
+    "this is amazon customer service": 72,
+    "calling from amazon": 68,
+    "amazon order problem": 65,
+    "amazon refund pending": 70,
+    "amazon prime membership": 62,
+    "flipkart calling": 68,
+    "flipkart order issue": 65,
+    "flipkart refund": 65,
+    "calling from flipkart": 68,
+    "meesho order problem": 65,
+    "swiggy delivery issue": 60,
+    "zomato order problem": 60,
+    "zomato refund": 60,
+    "ola customer care": 62,
+    "uber support calling": 62,
+    # Hindi utility threats
+    "bijli kat jayegi": 78,
+    "bijli connection band": 75,
+    "bijli ka bill pending": 72,
+    "light kat jayegi": 75,
+    "electricity bill overdue": 72,
+    "gas connection band ho jayega": 75,
+    "gas supply disconnect": 72,
+    "pani ka connection band": 70,
+    "water supply disconnect": 70,
+    # Unclaimed / maturity scams
+    "unclaimed insurance amount": 75,
+    "unclaimed money in your name": 78,
+    "policy maturity amount": 72,
+    "bonus amount pending": 70,
+    # Job scam patterns
+    "work from home job offer": 68,
+    "work from home guaranteed income": 75,
+    "data entry job guaranteed": 72,
+    "online job guaranteed salary": 75,
+    "pay for training material": 72,
+    "pay for training kit": 72,
+    "pay to start the job": 78,
+    "job registration fee": 72,
 }
 
 # ---------------------------------------------------------------------------
@@ -606,6 +747,25 @@ TECH_SUPPORT_TERMS: set[str] = {
     "system compromise", "data breach", "identity theft",
 }
 
+SECRECY_ISOLATION_TERMS: set[str] = {
+    # English
+    "dont tell anyone", "don't tell anyone", "do not tell anyone",
+    "keep this between us", "keep this confidential",
+    "do not inform", "do not discuss",
+    "confidential matter", "secret matter",
+    "do not contact a lawyer", "no need to tell",
+    "tell nobody", "inform nobody",
+    # Hindi
+    "kisi ko mat batana", "kisi ko mat bolo",
+    "kisi ko bhi mat batao", "family ko mat bolo",
+    "ghar mein kisi ko mat", "ye secret rakhna",
+    "किसी को मत बताना", "किसी को बोलना मत",
+    "परिवार को मत बताओ", "गोपनीय रखना",
+    # Telugu
+    "ఎవరికీ చెప్పకు", "ఎవరికీ చెప్పకండి",
+    "secret ga unchandi", "evvariki cheppakandi",
+}
+
 # All categories for iteration
 PATTERN_CATEGORIES: list[tuple[str, dict[str, int]]] = [
     ("DIGITAL_ARREST", DIGITAL_ARREST_PATTERNS),
@@ -634,6 +794,7 @@ CATEGORY_LABELS: dict[str, str] = {
     "AUTHORITY": "Authority impersonation language",
     "FINANCIAL_RISK": "Financial credential request",
     "TECH_SUPPORT": "Tech-support scam language",
+    "SECRECY": "Secrecy / isolation demand",
     **{f"KEYWORD_COOCCUR:{k}": v for k, v in ARCHETYPE_LABELS.items()},
 }
 
@@ -683,9 +844,9 @@ def analyze_text(text: str) -> ScamAnalysis:
     """Analyze transcribed text for scam patterns.
 
     Two detection layers:
-    1. Exact phrase matching (585+ patterns, 10 English categories).
+    1. Exact phrase matching (574+ patterns, 9 English categories).
     2. Keyword co-occurrence (13 archetypes × 10 Indian scripts + English).
-    Plus cross-language urgency/authority/financial/tech-support indicator bonuses.
+    Plus cross-language urgency/authority/financial/tech-support/secrecy indicator bonuses.
     """
     if not text or not text.strip():
         return ScamAnalysis(
@@ -726,6 +887,9 @@ def analyze_text(text: str) -> ScamAnalysis:
     total_score += _check_indicator_set(
         lower, TECH_SUPPORT_TERMS, detected, "TECH_SUPPORT", 12
     )
+    total_score += _check_indicator_set(
+        lower, SECRECY_ISOLATION_TERMS, detected, "SECRECY", 20
+    )
 
     # Cap at 100
     total_score = min(100, total_score)
@@ -757,7 +921,7 @@ def analyze_text(text: str) -> ScamAnalysis:
             if label and label not in matched_labels:
                 matched_labels.append(label)
     # Add indicator labels if they fired
-    for tag in ("URGENCY", "AUTHORITY", "FINANCIAL_RISK", "TECH_SUPPORT"):
+    for tag in ("URGENCY", "AUTHORITY", "FINANCIAL_RISK", "TECH_SUPPORT", "SECRECY"):
         if any(f"[{tag}]" in d for d in detected):
             label = CATEGORY_LABELS[tag]
             if label not in matched_labels:
