@@ -86,6 +86,8 @@ _BANK_DEMAND: set[str] = {
     # English
     "otp", "pin", "password", "cvv", "transfer", "share",
     "verify", "confirm", "send", "provide", "tell me",
+    "card number", "card details", "credit card", "debit card",
+    "expiry date", "expiry", "three digit", "16 digit",
     # Telugu
     "ఓటీపీ", "పిన్", "పాస్వర్డ్", "ట్రాన్స్ఫర్",
     "షేర్", "వెరిఫై", "చెప్పండి", "ఇవ్వండి", "పంపండి",
