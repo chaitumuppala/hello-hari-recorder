@@ -41,6 +41,9 @@ async def transcribe_audio(file: UploadFile, language: str = "hi"):
         raise HTTPException(status_code=503, detail="ASR engine not ready")
 
     content = await file.read()
+    # Limit uploaded audio to 10 MB
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Audio file too large (max 10 MB)")
 
     try:
         audio = _decode_audio(content)
@@ -93,6 +96,8 @@ async def transcribe_audio(file: UploadFile, language: str = "hi"):
 @router.post("/analyze-text", response_model=ScamAnalysis)
 async def analyze_text_only(text: str):
     """Analyze text for scam patterns without audio transcription."""
+    if len(text) > 10_000:
+        raise HTTPException(status_code=400, detail="Text too long (max 10,000 chars)")
     return analyze_text(text)
 
 

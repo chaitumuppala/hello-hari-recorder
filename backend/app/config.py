@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     app_name: str = "Scam Detector"
-    debug: bool = True
+    debug: bool = False
 
     # ASR engine: "faster_whisper" | "indic_conformer" | "hybrid"
     asr_engine: str = "hybrid"

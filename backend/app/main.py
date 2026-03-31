@@ -58,7 +58,10 @@ if _STATIC_DIR.is_dir():
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         """Serve React SPA — all non-API routes return index.html."""
-        file = _STATIC_DIR / full_path
+        file = (_STATIC_DIR / full_path).resolve()
+        # Guard against path traversal (e.g. ../../etc/passwd)
+        if not str(file).startswith(str(_STATIC_DIR.resolve())):
+            return FileResponse(_STATIC_DIR / "index.html")
         if file.is_file():
             return FileResponse(file)
         return FileResponse(_STATIC_DIR / "index.html")
