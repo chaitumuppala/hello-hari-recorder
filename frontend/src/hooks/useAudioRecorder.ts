@@ -82,7 +82,7 @@ export function useAudioRecorder(language: string) {
       console.error("Failed to start recording:", err);
       setStatus("error");
     }
-  }, [language, status]);
+  }, [language]);
 
   const stop = useCallback(() => {
     // Stop audio processing first (stop sending new audio)
