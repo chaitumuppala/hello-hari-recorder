@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.asr.factory import create_asr_engine
 from app.config import settings
-from app.routers import transcription, websocket
+from app.routers import patterns, transcription, websocket
 
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -61,6 +61,7 @@ app.add_middleware(
 
 app.include_router(transcription.router, prefix="/api")
 app.include_router(websocket.router, prefix="/api")
+app.include_router(patterns.router, prefix="/api")
 
 # Serve built frontend (for Docker / production)
 _STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
