@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-04-17T06:52:21.659196+00:00",
+  "schema_version": 2,
+  "generated_at": "2026-04-29T12:22:40.196304+00:00",
   "generator": "scripts/export_patterns_json.py",
   "source_repo": "hello-hari-recorder",
   "constants": {
@@ -40,7 +40,10 @@
         "anti national activities linked to your number": 98,
         "arrest warrant has been issued": 98,
         "arrested within 2 hours": 95,
+        "case has been registered under your aadhaar": 92,
+        "case registered under your aadhaar": 92,
         "case will become serious if you disconnect": 98,
+        "cbi headquarters": 90,
         "central bureau investigation": 98,
         "child trafficking allegations": 100,
         "customs enforcement calling": 90,
@@ -57,6 +60,7 @@
         "don't involve family lawyer in this matter": 100,
         "don't tell anyone about this call": 90,
         "dont tell anyone about this call": 90,
+        "drug trafficking case has been registered": 95,
         "drug trafficking case registered": 95,
         "fake currency circulation": 95,
         "fake passport found with your details": 95,
@@ -66,6 +70,7 @@
         "ghar mein kisi ko mat batao": 88,
         "hawala transaction detected": 90,
         "human organ trafficking": 100,
+        "i am calling from cbi": 95,
         "i am calling from cbi headquarters": 98,
         "if you inform anyone you will be arrested": 95,
         "if you tell anyone case will be worse": 92,
@@ -100,6 +105,7 @@
         "terrorism funding detected": 100,
         "this is a confidential matter": 78,
         "this is confidential government matter": 95,
+        "this is from cbi headquarters": 95,
         "this is from enforcement directorate": 95,
         "this is from mumbai police cyber cell": 95,
         "we are from supreme court of india": 100,
@@ -132,15 +138,19 @@
         "press 1 to avoid disconnection": 90,
         "sim card band hone wala hai": 85,
         "sim card cloning detected": 90,
+        "sim card has been cloned": 90,
         "sim card kyc verification failed": 80,
         "sim deactivation process started": 85,
+        "someone is using your number": 78,
         "telecom fraud detected on your number": 85,
         "telecom license cancellation": 88,
         "this is from telecom regulatory authority": 85,
         "trai compliance violation": 80,
         "unauthorized network access": 82,
         "your mobile services will be suspended": 85,
-        "your number will be disconnected in 2 hours": 90
+        "your number is being used by someone": 78,
+        "your number will be disconnected in 2 hours": 90,
+        "your sim has been cloned": 88
       }
     },
     {
@@ -609,6 +619,8 @@
         "debit card block ho gaya": 82,
         "demat account problem": 78,
         "digital wallet freeze": 80,
+        "earn daily from home": 75,
+        "earn from home": 70,
         "electricity bill overdue": 72,
         "firewall update karna hai": 70,
         "flipkart calling": 68,
@@ -617,38 +629,47 @@
         "gas connection band ho jayega": 75,
         "gas supply disconnect": 72,
         "google pay security": 75,
+        "guaranteed income": 75,
+        "guaranteed salary": 75,
         "insurance claim pending": 75,
         "internet banking suspended": 85,
         "job registration fee": 72,
         "light kat jayegi": 75,
+        "many people already earning": 68,
         "meesho order problem": 65,
         "microsoft se official call": 75,
         "mobile banking issue": 78,
         "mutual fund redemption": 72,
         "net banking password confirm karo": 95,
+        "no experience required start": 72,
         "ola customer care": 62,
         "online job guaranteed salary": 75,
         "otp share karo verification ke liye": 85,
         "pani ka connection band": 70,
         "pay for training kit": 72,
         "pay for training material": 72,
+        "pay security deposit for": 80,
         "pay to start the job": 78,
         "paytm account problem": 75,
         "phonepe verification": 72,
         "policy maturity amount": 72,
         "remote access dena hoga": 85,
         "security breach detect hua": 80,
+        "send security deposit for": 80,
+        "simple typing work": 72,
         "sir aapka computer infected hai": 75,
         "swiggy delivery issue": 60,
         "technical support ki zarurat": 70,
         "this is amazon customer service": 72,
         "trading account issue": 82,
+        "training material and id card": 75,
         "uber support calling": 62,
         "unclaimed insurance amount": 75,
         "unclaimed money in your name": 78,
         "upi pin batao security check": 90,
         "upi transaction failed": 70,
         "verification ke liye details chahiye": 80,
+        "verified company": 60,
         "virus remove karna padega": 75,
         "water supply disconnect": 70,
         "windows license expire ho gaya": 70,
@@ -1918,14 +1939,24 @@
       ],
       "threat": [
         "accident",
+        "alive",
         "arrested",
         "attack",
+        "blood",
+        "consequences",
         "critical",
         "danger",
+        "death",
+        "die",
         "emergency",
+        "harm",
         "hospital",
+        "hurt",
         "injured",
         "kidnap",
+        "life",
+        "ransom",
+        "serious",
         "serious condition",
         "surgery",
         "trouble",
@@ -3657,12 +3688,522 @@
       ]
     }
   ],
+  "narrative_phases": {
+    "digital_arrest": {
+      "label": "Digital arrest manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Establishes fake authority identity"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Introduces criminal accusations and fear"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "secrecy",
+          "description": "Demands victim not tell anyone"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands money transfer or personal info"
+        }
+      ],
+      "secrecy_keywords": [
+        "confidential",
+        "do not inform",
+        "don't disconnect",
+        "don't tell",
+        "evvariki cheppakandi",
+        "family ko mat",
+        "keep this between",
+        "kisi ko mat",
+        "stay on call",
+        "video call",
+        "किसी को मत",
+        "गोपनीय"
+      ]
+    },
+    "bank_otp": {
+      "label": "Bank impersonation manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Claims to be from victim's bank"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says account is blocked/compromised"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Creates artificial time pressure"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Asks for OTP/card/CVV/PIN"
+        }
+      ],
+      "urgency_keywords": [
+        "abhi",
+        "abhi ke abhi",
+        "as soon as possible",
+        "do it now",
+        "foran",
+        "immediately",
+        "isi waqt",
+        "jaldi",
+        "quickly",
+        "right away",
+        "right now",
+        "tatkal",
+        "turant",
+        "twaraga",
+        "urgent",
+        "ventane",
+        "without delay",
+        "अभी के अभी",
+        "जल्दी",
+        "तुरंत",
+        "అత్యవసరం",
+        "ఇప్పుడే",
+        "త్వరగా",
+        "వెంటనే"
+      ]
+    },
+    "family_emergency": {
+      "label": "Family emergency manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Invokes family member identity"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Describes emergency/accident/arrest"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "secrecy",
+          "description": "Says don't tell other family members"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands urgent money transfer"
+        }
+      ],
+      "secrecy_keywords": [
+        "being watched",
+        "do not call the police",
+        "do not inform",
+        "do not tell",
+        "don't inform",
+        "don't tell",
+        "dont call police",
+        "dont inform",
+        "dont tell",
+        "evvariki cheppakandi",
+        "family ko mat bolo",
+        "ghar mein kisi ko mat",
+        "inform nobody",
+        "keep secret",
+        "keep this between",
+        "kisi ko bhi mat batao",
+        "kisi ko mat batana",
+        "kisi ko mat batao",
+        "kisi ko mat bolo",
+        "ko mat batao",
+        "ko mat bolo",
+        "mat batana",
+        "mat batao",
+        "mat bolo",
+        "no need to tell",
+        "secret ga unchandi",
+        "tell nobody",
+        "we are watching",
+        "किसी को बोलना मत",
+        "किसी को मत बताओ",
+        "किसी को मत बताना",
+        "गोपनीय रखना",
+        "परिवार को मत बताओ",
+        "मत बताओ",
+        "मत बोलो",
+        "ఎవరికీ చెప్పకండి",
+        "ఎవరికీ చెప్పకు"
+      ]
+    },
+    "courier_customs": {
+      "label": "Courier/customs manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Claims to be courier/customs authority"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says drugs/contraband found in parcel"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "authority",
+          "description": "Transfers to fake police/CBI officer"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands fine/settlement payment"
+        }
+      ],
+      "authority_keywords": [
+        "cbi",
+        "inspector",
+        "ncb",
+        "officer",
+        "police",
+        "पुलिस",
+        "போலீஸ்",
+        "అధికారి"
+      ]
+    },
+    "trai_telecom": {
+      "label": "TRAI/telecom manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Claims to be from TRAI/telecom"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Threatens SIM disconnection"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Says action needed within hours"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Asks to press 1 or pay fee"
+        }
+      ],
+      "urgency_keywords": [
+        "2 hours",
+        "disconnect",
+        "immediately",
+        "right now",
+        "तुरंत",
+        "बंद",
+        "డిస్కనెక్ట్"
+      ]
+    },
+    "investment_crypto": {
+      "label": "Investment fraud manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Introduces investment/trading opportunity"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Creates FOMO - limited time/slots"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "social_proof",
+          "description": "Shows fake screenshots/testimonials"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands registration fee/deposit"
+        }
+      ],
+      "social_proof_keywords": [
+        "10x return",
+        "double your money",
+        "guaranteed",
+        "members profits",
+        "risk free",
+        "screenshot"
+      ]
+    },
+    "tech_support": {
+      "label": "Tech support manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Claims device is infected/compromised"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says data is at risk/being stolen"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "control",
+          "description": "Requests remote access/screen share"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Charges repair fee or steals credentials"
+        }
+      ],
+      "control_keywords": [
+        "anydesk",
+        "download",
+        "install",
+        "remote access",
+        "screen share",
+        "teamviewer",
+        "एनीडेस्क",
+        "रिमोट एक्सेस"
+      ]
+    },
+    "kyc_aadhaar": {
+      "label": "KYC/Aadhaar manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "References KYC/Aadhaar/PAN"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says KYC expired/account will close"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Demands immediate update"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Sends phishing link or asks for details"
+        }
+      ],
+      "urgency_keywords": [
+        "expired",
+        "immediately",
+        "lapsed",
+        "pending",
+        "एक्सपायर",
+        "तुरंत",
+        "लंबित"
+      ]
+    },
+    "lottery_prize": {
+      "label": "Lottery/prize manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Announces prize/lottery win"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says prize will expire/be forfeited"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Creates deadline pressure"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands processing fee/tax payment"
+        }
+      ],
+      "urgency_keywords": [
+        "24 hours",
+        "claim before",
+        "deadline",
+        "expire",
+        "last date",
+        "today only"
+      ]
+    },
+    "insurance_policy": {
+      "label": "Insurance manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "References policy/premium/insurance"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says policy will lapse/coverage lost"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Grace period ending"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands premium payment/bank details"
+        }
+      ],
+      "urgency_keywords": [
+        "cancel",
+        "expire",
+        "grace period",
+        "lapse",
+        "ग्रेस पीरियड",
+        "रद्द"
+      ]
+    },
+    "electricity_utility": {
+      "label": "Utility bill manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "References electricity/gas/water bill"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Threatens disconnection tonight"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Says within 2 hours"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Asks to pay via UPI/link"
+        }
+      ],
+      "urgency_keywords": [
+        "2 hours",
+        "2 घंटे",
+        "immediately",
+        "right now",
+        "tonight",
+        "आज रात"
+      ]
+    },
+    "job_employment": {
+      "label": "Job scam manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Offers job/placement opportunity"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says limited seats/closing today"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Filling fast, last chance"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands registration/training fee"
+        }
+      ],
+      "urgency_keywords": [
+        "closing today",
+        "filling fast",
+        "last date",
+        "limited seat",
+        "miss this opportunity"
+      ]
+    },
+    "loan_credit": {
+      "label": "Loan scam manipulation arc",
+      "phases": [
+        {
+          "id": "HOOK",
+          "triggers": "context",
+          "description": "Offers pre-approved loan/credit"
+        },
+        {
+          "id": "ESCALATE",
+          "triggers": "threat",
+          "description": "Says approval will cancel/CIBIL drop"
+        },
+        {
+          "id": "ISOLATE",
+          "triggers": "urgency",
+          "description": "Offer expiring today"
+        },
+        {
+          "id": "TRAP",
+          "triggers": "demand",
+          "description": "Demands processing fee to disburse"
+        }
+      ],
+      "urgency_keywords": [
+        "approval cancel",
+        "limited period",
+        "offer expiring",
+        "today only",
+        "आज ही",
+        "ऑफर खत्म"
+      ]
+    }
+  },
+  "metadata": {
+    "source": "news-derived",
+    "region": "india",
+    "languages": [
+      "en",
+      "hi",
+      "te",
+      "ta",
+      "kn",
+      "ml",
+      "bn",
+      "mr",
+      "gu",
+      "pa",
+      "or"
+    ],
+    "last_validated": "2026-04-29T12:22:40.196304+00:00"
+  },
   "stats": {
     "pattern_categories_count": 9,
-    "total_exact_phrases": 574,
+    "total_exact_phrases": 595,
     "indicator_sets_count": 5,
     "total_indicator_terms": 206,
     "archetypes_count": 13,
-    "total_archetype_keywords": 2648
+    "total_archetype_keywords": 2658,
+    "narrative_phases_count": 13
   }
 }

@@ -12,3 +12,7 @@ uvicorn[standard]>=0.34.0
 pydantic-settings>=2.0.0
 numpy>=1.26.0
 python-multipart>=0.0.18
+
+# ML classifier for scam detection
+scikit-learn>=1.4.0
+joblib>=1.3.0

@@ -504,6 +504,8 @@ _FAMILY_THREAT: set[str] = {
     "accident", "hospital", "arrested", "kidnap",
     "emergency", "critical", "surgery", "injured",
     "trouble", "danger", "attack", "serious condition",
+    "ransom", "alive", "consequences", "die", "harm",
+    "life", "death", "blood", "serious", "hurt",
     # Hindi
     "एक्सीडेंट", "हॉस्पिटल", "अस्पताल", "गिरफ्तार",
     "अपहरण", "इमरजेंसी", "सर्जरी", "घायल",
@@ -1449,6 +1451,267 @@ ARCHETYPE_LABELS: dict[str, str] = {
     "electricity_utility": "Electricity / utility bill scam",
     "job_employment": "Job / employment scam",
     "loan_credit": "Loan / pre-approved credit scam",
+}
+
+# ═══════════════════════════════════════════════════════════════════════
+# NARRATIVE PHASE DEFINITIONS
+# Each scam follows a manipulation arc: HOOK → ESCALATE → ISOLATE → TRAP
+# Phases map to which archetype keyword categories trigger transitions.
+# The state machine advances when keywords from the expected phase appear
+# in the conversation over time (across transcript chunks).
+# ═══════════════════════════════════════════════════════════════════════
+
+# Phase enum-like constants
+PHASE_IDLE = "IDLE"
+PHASE_HOOK = "HOOK"
+PHASE_ESCALATE = "ESCALATE"
+PHASE_ISOLATE = "ISOLATE"
+PHASE_TRAP = "TRAP"
+
+NARRATIVE_PHASES: dict[str, dict] = {
+    "digital_arrest": {
+        "label": "Digital arrest manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Establishes fake authority identity"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Introduces criminal accusations and fear"},
+            {"id": PHASE_ISOLATE, "triggers": "secrecy",
+             "description": "Demands victim not tell anyone"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands money transfer or personal info"},
+        ],
+        "secrecy_keywords": {
+            "don't tell", "do not inform", "keep this between",
+            "confidential", "don't disconnect", "stay on call",
+            "video call", "kisi ko mat", "family ko mat",
+            "evvariki cheppakandi", "किसी को मत", "गोपनीय",
+        },
+    },
+    "bank_otp": {
+        "label": "Bank impersonation manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Claims to be from victim's bank"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says account is blocked/compromised"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Creates artificial time pressure"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Asks for OTP/card/CVV/PIN"},
+        ],
+        "urgency_keywords": {
+            "immediately", "right now", "turant", "jaldi",
+            "abhi", "urgent", "ventane", "twaraga",
+            "అత్యవసరం", "వెంటనే", "तुरंत", "जल्दी",
+            # Pressure language beyond simple urgency
+            "quickly", "without delay", "right away",
+            "do it now", "as soon as possible",
+            "isi waqt", "abhi ke abhi", "foran", "tatkal",
+            "ఇప్పుడే", "త్వరగా", "अभी के अभी",
+        },
+    },
+    "family_emergency": {
+        "label": "Family emergency manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Invokes family member identity"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Describes emergency/accident/arrest"},
+            {"id": PHASE_ISOLATE, "triggers": "secrecy",
+             "description": "Says don't tell other family members"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands urgent money transfer"},
+        ],
+        "secrecy_keywords": {
+            "don't tell", "dont tell", "do not tell",
+            "don't inform", "dont inform", "do not inform",
+            "do not call the police", "dont call police",
+            "keep secret", "keep this between", "tell nobody",
+            "inform nobody", "no need to tell",
+            "we are watching", "being watched",
+            "kisi ko mat batao", "kisi ko mat batana",
+            "kisi ko mat bolo", "family ko mat bolo",
+            "ghar mein kisi ko mat", "kisi ko bhi mat batao",
+            "ko mat batao", "mat batao", "mat bolo",
+            "mat batana", "ko mat bolo",
+            "evvariki cheppakandi", "secret ga unchandi",
+            "किसी को मत बताओ", "किसी को मत बताना",
+            "किसी को बोलना मत", "गोपनीय रखना",
+            "परिवार को मत बताओ", "मत बताओ", "मत बोलो",
+            "ఎవరికీ చెప్పకండి", "ఎవరికీ చెప్పకు",
+        },
+    },
+    "courier_customs": {
+        "label": "Courier/customs manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Claims to be courier/customs authority"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says drugs/contraband found in parcel"},
+            {"id": PHASE_ISOLATE, "triggers": "authority",
+             "description": "Transfers to fake police/CBI officer"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands fine/settlement payment"},
+        ],
+        "authority_keywords": {
+            "police", "cbi", "ncb", "officer", "inspector",
+            "पुलिस", "అధికారి", "போலீஸ்",
+        },
+    },
+    "trai_telecom": {
+        "label": "TRAI/telecom manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Claims to be from TRAI/telecom"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Threatens SIM disconnection"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Says action needed within hours"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Asks to press 1 or pay fee"},
+        ],
+        "urgency_keywords": {
+            "2 hours", "immediately", "right now", "disconnect",
+            "बंद", "तुरंत", "డిస్కనెక్ట్",
+        },
+    },
+    "investment_crypto": {
+        "label": "Investment fraud manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Introduces investment/trading opportunity"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Creates FOMO - limited time/slots"},
+            {"id": PHASE_ISOLATE, "triggers": "social_proof",
+             "description": "Shows fake screenshots/testimonials"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands registration fee/deposit"},
+        ],
+        "social_proof_keywords": {
+            "screenshot", "members profits", "guaranteed",
+            "10x return", "double your money", "risk free",
+        },
+    },
+    "tech_support": {
+        "label": "Tech support manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Claims device is infected/compromised"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says data is at risk/being stolen"},
+            {"id": PHASE_ISOLATE, "triggers": "control",
+             "description": "Requests remote access/screen share"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Charges repair fee or steals credentials"},
+        ],
+        "control_keywords": {
+            "anydesk", "teamviewer", "remote access", "screen share",
+            "download", "install", "एनीडेस्क", "रिमोट एक्सेस",
+        },
+    },
+    "kyc_aadhaar": {
+        "label": "KYC/Aadhaar manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "References KYC/Aadhaar/PAN"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says KYC expired/account will close"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Demands immediate update"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Sends phishing link or asks for details"},
+        ],
+        "urgency_keywords": {
+            "expired", "lapsed", "pending", "immediately",
+            "एक्सपायर", "लंबित", "तुरंत",
+        },
+    },
+    "lottery_prize": {
+        "label": "Lottery/prize manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Announces prize/lottery win"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says prize will expire/be forfeited"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Creates deadline pressure"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands processing fee/tax payment"},
+        ],
+        "urgency_keywords": {
+            "24 hours", "today only", "last date", "expire",
+            "claim before", "deadline",
+        },
+    },
+    "insurance_policy": {
+        "label": "Insurance manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "References policy/premium/insurance"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says policy will lapse/coverage lost"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Grace period ending"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands premium payment/bank details"},
+        ],
+        "urgency_keywords": {
+            "grace period", "lapse", "expire", "cancel",
+            "ग्रेस पीरियड", "रद्द",
+        },
+    },
+    "electricity_utility": {
+        "label": "Utility bill manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "References electricity/gas/water bill"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Threatens disconnection tonight"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Says within 2 hours"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Asks to pay via UPI/link"},
+        ],
+        "urgency_keywords": {
+            "2 hours", "tonight", "immediately", "right now",
+            "2 घंटे", "आज रात",
+        },
+    },
+    "job_employment": {
+        "label": "Job scam manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Offers job/placement opportunity"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says limited seats/closing today"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Filling fast, last chance"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands registration/training fee"},
+        ],
+        "urgency_keywords": {
+            "filling fast", "limited seat", "last date",
+            "closing today", "miss this opportunity",
+        },
+    },
+    "loan_credit": {
+        "label": "Loan scam manipulation arc",
+        "phases": [
+            {"id": PHASE_HOOK, "triggers": "context",
+             "description": "Offers pre-approved loan/credit"},
+            {"id": PHASE_ESCALATE, "triggers": "threat",
+             "description": "Says approval will cancel/CIBIL drop"},
+            {"id": PHASE_ISOLATE, "triggers": "urgency",
+             "description": "Offer expiring today"},
+            {"id": PHASE_TRAP, "triggers": "demand",
+             "description": "Demands processing fee to disburse"},
+        ],
+        "urgency_keywords": {
+            "today only", "offer expiring", "limited period",
+            "approval cancel", "आज ही", "ऑफर खत्म",
+        },
+    },
 }
 
 

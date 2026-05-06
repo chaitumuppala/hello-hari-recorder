@@ -44,9 +44,10 @@ if "pydantic" not in sys.modules:
     sys.modules["pydantic"] = _pyd
 
 from app.detection import scam_archetypes, scam_detector  # noqa: E402
+from app.detection.scam_archetypes import NARRATIVE_PHASES  # noqa: E402
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _sorted_set(s: set[str]) -> list[str]:
@@ -90,13 +91,27 @@ def build_patterns() -> dict:
     # Layer 2: keyword co-occurrence archetypes
     archetypes: list[dict] = []
     for label, ctx_kws, thr_kws, dem_kws in scam_archetypes.SCAM_ARCHETYPES:
-        archetypes.append({
+        arch_entry: dict = {
             "id": label,
             "label": scam_archetypes.ARCHETYPE_LABELS[label],
             "context": _sorted_set(ctx_kws),
             "threat": _sorted_set(thr_kws),
             "demand": _sorted_set(dem_kws),
-        })
+        }
+        archetypes.append(arch_entry)
+
+    # Layer 3: narrative phase definitions per archetype
+    narrative_phases: dict = {}
+    for arch_id, phase_def in NARRATIVE_PHASES.items():
+        exported = {
+            "label": phase_def["label"],
+            "phases": phase_def["phases"],
+        }
+        # Include any extra keyword sets (secrecy, urgency, authority, etc.)
+        for key in phase_def:
+            if key.endswith("_keywords"):
+                exported[key] = _sorted_set(phase_def[key])
+        narrative_phases[arch_id] = exported
 
     # Stats — useful for sanity checks & telemetry
     total_exact_phrases = sum(len(c["patterns"]) for c in pattern_categories)
@@ -139,6 +154,14 @@ def build_patterns() -> dict:
         "pattern_categories": pattern_categories,
         "indicator_sets": indicator_sets,
         "archetypes": archetypes,
+        "narrative_phases": narrative_phases,
+
+        "metadata": {
+            "source": "news-derived",
+            "region": "india",
+            "languages": ["en", "hi", "te", "ta", "kn", "ml", "bn", "mr", "gu", "pa", "or"],
+            "last_validated": datetime.now(timezone.utc).isoformat(),
+        },
 
         "stats": {
             "pattern_categories_count": len(pattern_categories),
@@ -147,6 +170,7 @@ def build_patterns() -> dict:
             "total_indicator_terms": total_indicator_terms,
             "archetypes_count": len(archetypes),
             "total_archetype_keywords": total_archetype_keywords,
+            "narrative_phases_count": len(narrative_phases),
         },
     }
 

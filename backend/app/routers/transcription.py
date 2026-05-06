@@ -9,7 +9,8 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from app.asr.base import ASREngine
 from app.config import settings
 from app.db.database import get_recent_records, save_record
-from app.detection.scam_detector import analyze_text
+from app.detection.scam_detector import analyze_text, analyze_session
+from app.detection.narrative_tracker import NarrativeTracker
 from app.models.schemas import CallRecord, HealthResponse, ScamAnalysis
 
 logger = logging.getLogger(__name__)
@@ -125,3 +126,28 @@ def _decode_audio(raw_bytes: bytes) -> np.ndarray:
     # Assume raw PCM 16-bit signed, 16kHz mono
     audio = np.frombuffer(raw_bytes, dtype=np.int16)
     return audio.astype(np.float32) / 32768.0
+
+
+# ── Test workbench endpoints ─────────────────────────────────────────
+
+from pydantic import BaseModel
+
+
+class AnalyzeRequest(BaseModel):
+    text: str
+    chunks: list[str] | None = None  # If provided, runs session mode
+
+
+@router.post("/api/analyze", response_model=ScamAnalysis)
+async def analyze_endpoint(req: AnalyzeRequest):
+    """Analyze text for scam patterns — used by test workbench.
+
+    If `chunks` is provided, runs session mode with narrative tracking.
+    Otherwise, runs single-shot analysis on `text`.
+    """
+    if req.chunks:
+        tracker = NarrativeTracker()
+        result = analyze_session(req.chunks, tracker)
+    else:
+        result = analyze_text(req.text)
+    return result

@@ -14,6 +14,7 @@ Capped at 100.
 import logging
 
 from app.detection.scam_archetypes import ARCHETYPE_LABELS, check_keyword_cooccurrence
+from app.detection.narrative_tracker import NarrativeTracker
 from app.models.schemas import ScamAnalysis
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,12 @@ DIGITAL_ARREST_PATTERNS: dict[str, int] = {
     "anti national activities linked to your number": 98,
     "terror charges will be filed": 100,
     "drug trafficking case registered": 95,
+    "drug trafficking case has been registered": 95,
+    "case has been registered under your aadhaar": 92,
+    "case registered under your aadhaar": 92,
+    "i am calling from cbi": 95,
+    "this is from cbi headquarters": 95,
+    "cbi headquarters": 90,
     "fake passport found with your details": 95,
     "hawala transaction detected": 90,
     "suspicious international transfers": 88,
@@ -135,6 +142,10 @@ TRAI_PATTERNS: dict[str, int] = {
     "bulk sms violation": 75,
     "telecom license cancellation": 88,
     "sim card cloning detected": 90,
+    "sim card has been cloned": 90,
+    "your sim has been cloned": 88,
+    "someone is using your number": 78,
+    "your number is being used by someone": 78,
     "unauthorized network access": 82,
 }
 
@@ -665,6 +676,18 @@ HINGLISH_PATTERNS: dict[str, int] = {
     "pay for training kit": 72,
     "pay to start the job": 78,
     "job registration fee": 72,
+    # Part-time / earn-from-home scams
+    "earn from home": 70,
+    "earn daily from home": 75,
+    "simple typing work": 72,
+    "guaranteed salary": 75,
+    "guaranteed income": 75,
+    "no experience required start": 72,
+    "send security deposit for": 80,
+    "pay security deposit for": 80,
+    "training material and id card": 75,
+    "verified company": 60,
+    "many people already earning": 68,
 }
 
 # ---------------------------------------------------------------------------
@@ -959,3 +982,129 @@ def analyze_text(text: str) -> ScamAnalysis:
         explanation=explanation,
         debug_details=detected,
     )
+
+
+def analyze_session(
+    chunks: list[str],
+    tracker: NarrativeTracker | None = None,
+    classifier: "ScamClassifier | None" = None,
+) -> ScamAnalysis:
+    """Analyze a sequence of transcript chunks with narrative tracking.
+
+    Uses per-chunk analysis (not concatenation) to avoid false co-occurrence
+    matches from unrelated words across chunks.  The narrative phase acts as
+    a confidence gate: a high risk score alone isn't enough — the call must
+    also progress through the manipulation arc (HOOK→ESCALATE→ISOLATE→TRAP).
+
+    When a classifier is provided, it acts as a secondary confidence layer
+    that can suppress false positives from keyword coincidences.
+
+    Args:
+        chunks: List of transcript chunks in chronological order.
+        tracker: Optional pre-existing NarrativeTracker instance (for
+                 ongoing WebSocket sessions). If None, creates a new one.
+        classifier: Optional trained ScamClassifier for intent-based
+                    false positive suppression.
+
+    Returns:
+        ScamAnalysis with both pattern scores and narrative phase info.
+    """
+    if tracker is None:
+        tracker = NarrativeTracker()
+
+    # Analyze each chunk individually; keep the highest-risk result
+    best_result = None
+    all_patterns = []
+    all_debug = []
+    for chunk in chunks:
+        tracker.advance(chunk)
+        r = analyze_text(chunk)
+        if best_result is None or r.risk_score > best_result.risk_score:
+            best_result = r
+        all_patterns.extend(r.matched_patterns)
+        all_debug.extend(r.debug_details)
+
+    if best_result is None:
+        best_result = ScamAnalysis(
+            is_scam=False, risk_score=0.0, matched_patterns=[],
+            explanation="No text to analyze",
+        )
+
+    # De-duplicate patterns
+    seen = set()
+    unique_patterns = []
+    for p in all_patterns:
+        if p not in seen:
+            seen.add(p)
+            unique_patterns.append(p)
+    best_result.matched_patterns = unique_patterns
+    best_result.debug_details = all_debug
+
+    # Overlay narrative state
+    narrative = tracker.get_state()
+    best_result.narrative_phase = narrative.best_phase
+    best_result.narrative_archetype = narrative.best_archetype
+    best_result.narrative_phase_label = narrative.phase_label
+    best_result.narrative_phase_score = narrative.phase_score
+
+    # --- Classifier-based confidence layer ---
+    # When available, the ML classifier provides a second opinion on each
+    # chunk.  We use the MEAN confidence across chunks (not max) because
+    # legitimate calls have consistently low scores while scam calls have
+    # at least some high-confidence chunks that pull the mean up.
+    classifier_scam_score = None
+    if classifier is not None:
+        scam_confidences = []
+        for chunk in chunks:
+            if chunk.strip():
+                cr = classifier.predict(chunk)
+                scam_confidences.append(cr.confidence)
+        if scam_confidences:
+            classifier_scam_score = sum(scam_confidences) / len(scam_confidences)
+            best_result.debug_details.append(
+                f"[CLASSIFIER] mean_confidence={classifier_scam_score:.2f} "
+                f"max={max(scam_confidences):.2f}"
+            )
+
+    # Final scam decision: require BOTH a risk threshold AND narrative
+    # progression.  Thresholds are tiered: higher narrative confidence
+    # allows lower risk thresholds (the manipulation arc confirms intent).
+    #
+    # KEY INSIGHT: Legitimate calls routinely reach ESCALATE because
+    # common words ("bank", "account", "police", "insurance") match
+    # archetype context/threat keywords.  Only ISOLATE and TRAP phases
+    # indicate actual manipulation tactics (secrecy demands, credential
+    # requests), so those get lower thresholds.
+    if narrative.phase_score >= 95:  # TRAP — full manipulation arc
+        best_result.is_scam = best_result.risk_score >= 0.3
+    elif narrative.phase_score >= 65:  # ISOLATE — secrecy/isolation demands
+        best_result.is_scam = best_result.risk_score >= 0.5
+    elif narrative.phase_score >= 40:  # ESCALATE — common in legit calls too
+        best_result.is_scam = best_result.risk_score >= 0.9
+    else:  # HOOK or IDLE
+        best_result.is_scam = best_result.risk_score >= 0.95
+
+    # Classifier override: if the keyword engine flagged scam but the ML
+    # classifier is confident it's legitimate, suppress the alert.
+    # This specifically fixes false positives like "credit card application
+    # approved" where domain vocabulary triggers keyword co-occurrence.
+    #
+    # GUARD: Only override when the classifier is actually confident
+    # (mean < 0.45).  At 0.45-0.50 the classifier is uncertain (e.g.,
+    # on Devanagari/native script text it hasn't been trained on) and
+    # should not suppress real scams.
+    if (classifier_scam_score is not None
+            and best_result.is_scam
+            and classifier_scam_score < 0.45):
+        best_result.is_scam = False
+        best_result.debug_details.append(
+            f"[CLASSIFIER_OVERRIDE] suppressed: classifier_conf={classifier_scam_score:.2f}"
+        )
+
+    if best_result.is_scam and narrative.best_phase in ("ISOLATE", "TRAP"):
+        best_result.explanation = (
+            f"NARRATIVE ALERT ({narrative.best_phase}): "
+            f"{narrative.phase_label} | {best_result.explanation}"
+        )
+
+    return best_result

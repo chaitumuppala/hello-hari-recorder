@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import time as _time
 import uuid
 from datetime import datetime
@@ -11,7 +12,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.asr.base import ASREngine
 from app.config import settings
 from app.db.database import create_session, end_session, save_record
+from app.detection.narrative_tracker import NarrativeTracker
 from app.detection.scam_detector import analyze_text
+from app.detection.classifier import ScamClassifier
 from app.models.schemas import CallRecord
 
 logger = logging.getLogger(__name__)
@@ -19,6 +22,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 asr_engine: ASREngine | None = None
+
+# Load classifier once at module import
+_classifier: ScamClassifier | None = None
+_CLASSIFIER_PATH = os.path.join(
+    os.path.dirname(__file__), '..', 'detection', 'models', 'scam_classifier.joblib'
+)
+
+
+def _get_classifier() -> ScamClassifier | None:
+    global _classifier
+    if _classifier is None and os.path.exists(_CLASSIFIER_PATH):
+        try:
+            _classifier = ScamClassifier.load(_CLASSIFIER_PATH)
+            logger.info("Loaded scam classifier from %s", _CLASSIFIER_PATH)
+        except Exception:
+            logger.warning("Failed to load scam classifier", exc_info=True)
+    return _classifier
 
 
 def set_engine(engine: ASREngine) -> None:
@@ -38,6 +58,7 @@ class _SessionState:
         self.total_chunks: int = 0
         self.total_audio_seconds: float = 0.0
         self.all_transcripts: list[str] = []
+        self.narrative_tracker = NarrativeTracker()
 
 
 async def _process_chunk(
@@ -83,12 +104,31 @@ async def _process_chunk(
     window_analysis = analyze_text(window_text)
     detect_ms = round((_time.monotonic() - t1) * 1000)
 
+    # Advance narrative state machine with this chunk
+    narrative_result = state.narrative_tracker.advance(result.text)
+
     if window_analysis.risk_score > chunk_analysis.risk_score:
         current_analysis = window_analysis
         analysis_source = "window"
     else:
         current_analysis = chunk_analysis
         analysis_source = "chunk"
+
+    # Overlay narrative phase onto the chosen analysis
+    current_analysis.narrative_phase = narrative_result.best_phase
+    current_analysis.narrative_archetype = narrative_result.best_archetype
+    current_analysis.narrative_phase_label = narrative_result.phase_label
+    current_analysis.narrative_phase_score = narrative_result.phase_score
+
+    # ML classifier override: suppress false positives on the current chunk
+    clf = _get_classifier()
+    if clf is not None and current_analysis.is_scam:
+        clf_result = clf.predict(result.text)
+        if clf_result.confidence < 0.45:
+            current_analysis.is_scam = False
+            current_analysis.debug_details.append(
+                f"[CLASSIFIER_OVERRIDE] suppressed: conf={clf_result.confidence:.2f}"
+            )
 
     # Sticky max
     if current_analysis.risk_score > state.session_max_score:
@@ -139,6 +179,10 @@ async def _process_chunk(
                 "window_text": window_text,
                 "window_score": window_analysis.risk_score,
                 "chunk_score": chunk_analysis.risk_score,
+                "narrative_phase": narrative_result.best_phase,
+                "narrative_archetype": narrative_result.best_archetype,
+                "narrative_phase_label": narrative_result.phase_label,
+                "narrative_phase_score": narrative_result.phase_score,
             },
         })
     except Exception:

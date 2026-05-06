@@ -90,3 +90,66 @@ async def get_patterns_meta() -> JSONResponse:
     downloading the full bundle."""
     _, _, meta = _load()
     return JSONResponse(meta)
+
+
+# ── Authority contribution endpoints ──────────────────────────────────
+
+from pydantic import BaseModel
+from datetime import datetime
+
+# In-memory store for demo — replace with SQLite/DB in production
+_contributed_patterns: list[dict] = []
+_next_id = 1
+
+
+class ContributeRequest(BaseModel):
+    phrase: str
+    category: str
+    language: str = "en"
+    severity: int = 80
+    source: str = "authority"
+
+
+@router.post("/patterns/contribute")
+async def contribute_pattern(req: ContributeRequest):
+    """Submit a new scam pattern for review."""
+    global _next_id
+    entry = {
+        "id": _next_id,
+        "phrase": req.phrase,
+        "category": req.category,
+        "language": req.language,
+        "severity": req.severity,
+        "source": req.source,
+        "status": "pending",
+        "submitted_at": datetime.now().isoformat(),
+    }
+    _contributed_patterns.append(entry)
+    _next_id += 1
+    return {"status": "ok", "id": entry["id"]}
+
+
+@router.get("/patterns/pending")
+async def get_pending_patterns():
+    """List all pending pattern contributions."""
+    return [p for p in _contributed_patterns if p["status"] == "pending"]
+
+
+@router.post("/patterns/{pattern_id}/approve")
+async def approve_pattern(pattern_id: int):
+    """Approve a contributed pattern."""
+    for p in _contributed_patterns:
+        if p["id"] == pattern_id:
+            p["status"] = "approved"
+            return {"status": "approved", "pattern": p}
+    return {"status": "not_found"}
+
+
+@router.post("/patterns/{pattern_id}/reject")
+async def reject_pattern(pattern_id: int):
+    """Reject a contributed pattern."""
+    for p in _contributed_patterns:
+        if p["id"] == pattern_id:
+            p["status"] = "rejected"
+            return {"status": "rejected"}
+    return {"status": "not_found"}
